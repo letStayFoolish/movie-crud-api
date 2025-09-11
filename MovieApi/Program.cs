@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MovieApi.Middlewares;
 using MovieApi.Persistence;
 using MovieApi.Services;
 using Scalar.AspNetCore;
@@ -19,6 +20,8 @@ try
     });
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
     builder.Services.AddDbContext<MovieDbContext>(options =>
     {
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -44,6 +47,8 @@ try
         app.MapOpenApi();
         app.MapScalarApiReference();
     }
+    
+    app.UseExceptionHandler();
 
     app.UseHttpsRedirection();
 
