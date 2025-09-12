@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using MovieApi.Enums;
 using MovieApi.Middlewares;
 using MovieApi.Persistence;
-using MovieApi.Services;
+using MovieApi.Services.Movies;
+using MovieApi.Services.Notifications;
+using MovieApi.Utilities;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -30,6 +33,10 @@ try
         options.UseNpgsql(connectionString);
     });
     builder.Services.AddTransient<IMovieService, MovieService>();
+    builder.Services.AddKeyedScoped<INotificationService, EmailNotificationService>(NotificationChannel.Email);;
+    builder.Services.AddKeyedScoped<INotificationService, SmsNotificationService>(NotificationChannel.Sms);
+    builder.Services.AddScoped<NotificationHandler>();
+
     builder.Services.Configure<RouteOptions>(o => o.LowercaseUrls = true);
     builder.Services.Configure<JsonOptions>(o =>
     {

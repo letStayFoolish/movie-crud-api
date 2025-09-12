@@ -4,7 +4,7 @@ using MovieApi.Exceptions;
 using MovieApi.Models;
 using MovieApi.Persistence;
 
-namespace MovieApi.Services;
+namespace MovieApi.Services.Movies;
 
 public sealed class MovieService : IMovieService
 {

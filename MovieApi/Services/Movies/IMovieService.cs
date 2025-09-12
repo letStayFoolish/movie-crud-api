@@ -1,6 +1,6 @@
 using MovieApi.DTOs.Movie;
 
-namespace MovieApi.Services;
+namespace MovieApi.Services.Movies;
 
 public interface IMovieService
 {

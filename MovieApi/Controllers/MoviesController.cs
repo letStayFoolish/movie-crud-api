@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MovieApi.DTOs.Movie;
-using MovieApi.Services;
+using MovieApi.Services.Movies;
 
 namespace MovieApi.Controllers;
 
