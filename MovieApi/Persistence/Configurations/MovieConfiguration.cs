@@ -12,15 +12,15 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
     {
         // Define table name
         builder.ToTable("movies");
-        
+
         // Set primary key
         builder.HasKey(m => m.Id);
-        
+
         // Configure properties
         builder.Property(m => m.Title)
             .IsRequired()
             .HasMaxLength(200);
-        
+
         builder.Property(m => m.Genre)
             .IsRequired()
             .HasMaxLength(100);
@@ -39,7 +39,7 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         builder.Property(m => m.LastModified)
             .IsRequired()
             .ValueGeneratedOnUpdate();
-        
+
         // Optional: add index for better query performance
         // creates a database index on the Title column. This can significantly improve query performance when searching or filtering by Title
         builder.HasIndex(m => m.Title);

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using MovieApi.Middlewares;
 using MovieApi.Persistence;
@@ -20,6 +21,7 @@ try
     });
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
+    builder.Services.AddHealthChecks();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
     builder.Services.AddDbContext<MovieDbContext>(options =>
@@ -28,7 +30,12 @@ try
         options.UseNpgsql(connectionString);
     });
     builder.Services.AddTransient<IMovieService, MovieService>();
-
+    builder.Services.Configure<RouteOptions>(o => o.LowercaseUrls = true);
+    builder.Services.Configure<JsonOptions>(o =>
+    {
+        o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        o.SerializerOptions.WriteIndented = false;
+    });
     var app = builder.Build();
 
     await using (var serviceScope = app.Services.CreateAsyncScope())
@@ -47,14 +54,16 @@ try
         app.MapOpenApi();
         app.MapScalarApiReference();
     }
-    
+
     app.UseExceptionHandler();
 
     app.UseHttpsRedirection();
 
     app.UseAuthorization();
-    
+
+    // Endpoints
     app.MapControllers();
+    app.MapHealthChecks("/health");
 
     app.Run();
 }

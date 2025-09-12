@@ -7,7 +7,7 @@ public class Movie : EntityBase
     public string Genre { get; private set; }
     public DateTimeOffset ReleaseDate { get; private set; }
     public double Rating { get; private set; }
-    
+
     // private constructor for ORM frameworks
     private Movie()
     {
@@ -26,7 +26,7 @@ public class Movie : EntityBase
     public static Movie Create(string title, string genre, DateTimeOffset releaseDate, double rating)
     {
         ValidateInputs(title, genre, releaseDate, rating);
-        
+
         return new Movie()
         {
             Title = title,
@@ -43,7 +43,7 @@ public class Movie : EntityBase
         this.Genre = genre;
         this.ReleaseDate = releaseDate;
         this.Rating = rating;
-        
+
         // Update
         UpdateLastModified();
     }
@@ -54,14 +54,17 @@ public class Movie : EntityBase
         {
             throw new ArgumentException("Title cannot be null or whitespace", nameof(title));
         }
+
         if (string.IsNullOrWhiteSpace(genre))
         {
             throw new ArgumentException("Genre cannot be null or whitespace", nameof(genre));
         }
+
         if (releaseDate < DateTimeOffset.MinValue)
         {
             throw new ArgumentException("Release date cannot be before 1900", nameof(releaseDate));
         }
+
         if (rating < 0 || rating > 10)
         {
             throw new ArgumentException("Rating must be between 0 and 10", nameof(rating));

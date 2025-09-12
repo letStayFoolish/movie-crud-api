@@ -26,7 +26,7 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         // 2) Map extension -> HTTP status + title/type
         var (status, title) = MapExtensions(exception);
-        
+
         // 3) Build ProblemDetails (do not leak internals in prod)
         var env = httpContext.RequestServices.GetRequiredService<IHostEnvironment>();
         var problemDetail = new ProblemDetails
@@ -37,13 +37,13 @@ public class GlobalExceptionHandler : IExceptionHandler
             Detail = env.IsDevelopment() ? exception.ToString() : null,
             Instance = httpContext.Request.Path
         };
-            
+
         // 4) Enrich universally useful metadata
         problemDetail.Extensions["traceId"] = httpContext.TraceIdentifier;
         problemDetail.Extensions["timestamp"] = DateTimeOffset.UtcNow.ToString("o");
-        
+
         httpContext.Response.StatusCode = status;
-        
+
         // 5. Write response
         await _problemDetailsService.WriteAsync(new ProblemDetailsContext
         {
@@ -94,7 +94,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             // Not supported/implemented
             NotSupportedException => (StatusCodes.Status405MethodNotAllowed, "Operation not supported"),
             NotImplementedException => (StatusCodes.Status501NotImplemented, "Not implemented"),
-            
+
             // Custom exceptions
             MovieNotFoundException => (StatusCodes.Status404NotFound, "Movie not found"),
 

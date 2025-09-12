@@ -19,9 +19,9 @@ public sealed class MovieService : IMovieService
 
     public async Task<MovieDto> CreateMovieAsync(CreateMovieDto movieDto, CancellationToken cancellationToken = default)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogInformation("Creating movie with title: {title}, info: {@movie}.", movieDto.Title, movieDto);
+            _logger.LogDebug("Creating movie with title: {title}, info: {@movie}.", movieDto.Title, movieDto);
         }
 
         var newMovie = Movie.Create(movieDto.Title, movieDto.Genre, movieDto.ReleaseDate, movieDto.Rating);

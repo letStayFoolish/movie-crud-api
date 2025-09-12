@@ -9,26 +9,28 @@ namespace MovieApi.Controllers;
 public class MoviesController : ControllerBase
 {
     private readonly IMovieService _service;
+
     public MoviesController(IMovieService service)
     {
         _service = service;
     }
+
     // POST
     [HttpPost]
     public async Task<IActionResult> CreateMovie([FromBody] CreateMovieDto command, CancellationToken cancellationToken)
     {
         var movie = await _service.CreateMovieAsync(command, cancellationToken);
-        return CreatedAtAction(nameof(GetMovieById), new {Id = movie.Id}, movie);
+        return CreatedAtAction(nameof(GetMovieById), new { Id = movie.Id }, movie);
     }
-    
+
     // GET
     [HttpGet]
     public async Task<IActionResult> GetAllMovies(CancellationToken cancellationToken)
     {
         var movies = await _service.GetAllMoviesAsync(cancellationToken);
-        return Ok(movies);       
+        return Ok(movies);
     }
-    
+
     // GET
     [HttpGet]
     [Route("{id}")]
@@ -40,19 +42,20 @@ public class MoviesController : ControllerBase
         {
             return NotFound(new { Message = $"Movie with ID {id} not found." });
         }
-        
+
         return Ok(movie);
     }
-    
+
     // PUT
     [HttpPut]
     [Route("{id}")]
-    public async Task<IActionResult> UpdateMovie([FromRoute] Guid id, [FromBody] UpdateMovieDto command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateMovie([FromRoute] Guid id, [FromBody] UpdateMovieDto command,
+        CancellationToken cancellationToken)
     {
         await _service.UpdateMovieAsync(id, command, cancellationToken);
         return NoContent();
     }
-    
+
     // DELETE
     [HttpDelete]
     [Route("{id}")]
