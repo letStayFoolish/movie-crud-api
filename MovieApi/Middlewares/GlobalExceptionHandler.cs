@@ -24,7 +24,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             _logger.LogError(exception, "Unhandled exception. TraceId: {TraceId}", httpContext.TraceIdentifier);
         }
 
-        // 2) Map extension -> HTTP status + title/type
+        // 2) Map extension -> HTTP status and title/type
         var (status, title) = MapExtensions(exception);
 
         // 3) Build ProblemDetails (do not leak internals in prod)
@@ -84,7 +84,10 @@ public class GlobalExceptionHandler : IExceptionHandler
                 (StatusCodes.Status409Conflict, "Concurrency conflict"),
 
             // Upstream HTTP failures
-            HttpRequestException httpEx when httpEx.StatusCode is not null =>
+            // Before:
+            // HttpRequestException httpEx when httpEx.StatusCode is not null =>
+            // After:
+            HttpRequestException {StatusCode: not null} httpEx =>
                 ((int)httpEx.StatusCode.Value, "Upstream HTTP error"),
 
             // Timeouts / cancellations
