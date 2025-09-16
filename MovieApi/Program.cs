@@ -33,7 +33,7 @@ try
         options.UseNpgsql(connectionString);
     });
     builder.Services.AddTransient<IMovieService, MovieService>();
-    builder.Services.AddKeyedScoped<INotificationService, EmailNotificationService>(NotificationChannel.Email);;
+    builder.Services.AddKeyedScoped<INotificationService, EmailNotificationService>(NotificationChannel.Email);
     builder.Services.AddKeyedScoped<INotificationService, SmsNotificationService>(NotificationChannel.Sms);
     builder.Services.AddScoped<NotificationHandler>();
 
