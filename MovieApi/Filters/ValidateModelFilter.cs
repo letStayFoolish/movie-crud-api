@@ -11,6 +11,7 @@ public class ValidateModelFilter : IActionFilter
     {
         if (!context.ModelState.IsValid)
         {
+            // var model = new ArgumentException(context.ModelState.ToString());
             context.Result = new BadRequestObjectResult(context.ModelState);
         }
     }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using MovieApi.Enums;
+using MovieApi.Filters;
 using MovieApi.Middlewares;
 using MovieApi.Persistence;
 using MovieApi.Services.Movies;
@@ -22,7 +23,13 @@ try
         config.WriteTo.Console();
         config.ReadFrom.Configuration(context.Configuration);
     });
-    builder.Services.AddControllers();
+
+    builder.Services.AddScoped<LoggingFilter>(); // register the filter itself
+
+    builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add<LoggingFilter>(); // resolve from DI per request (scoped)
+    });
     builder.Services.AddOpenApi();
     builder.Services.AddHealthChecks();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

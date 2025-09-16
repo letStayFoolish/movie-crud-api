@@ -6,7 +6,8 @@ using MovieApi.Services.Notifications;
 namespace MovieApi.Utilities;
 
 public sealed class NotificationHandler(
-    [FromKeyedServices(NotificationChannel.Email)] INotificationService emailService,
+    [FromKeyedServices(NotificationChannel.Email)]
+    INotificationService emailService,
     [FromKeyedServices(NotificationChannel.Sms)]
     INotificationService smsService)
 {

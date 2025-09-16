@@ -6,7 +6,7 @@ using MovieApi.Services.Movies;
 namespace MovieApi.Controllers;
 
 [ApiController]
-[TypeFilter(typeof(LoggingFilter))]
+// [TypeFilter(typeof(LoggingFilter))]
 [TypeFilter(typeof(ValidateModelFilter))]
 [Route("api/[controller]")]
 public class MoviesController : ControllerBase

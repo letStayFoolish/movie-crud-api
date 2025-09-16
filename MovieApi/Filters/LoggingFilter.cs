@@ -1,6 +1,4 @@
-﻿// This file is part of the project. Copyright (c) Company.
-
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MovieApi.Filters;
 
