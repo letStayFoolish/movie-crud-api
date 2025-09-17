@@ -7,7 +7,7 @@ namespace MovieApi.Controllers;
 
 [ApiController]
 // [TypeFilter(typeof(LoggingFilter))]
-[TypeFilter(typeof(ValidateModelFilter))]
+// [TypeFilter(typeof(ValidateModelFilter))] // TODO: for this to be working we need to ad in Program.cs: builder.Services.Configure<ApiBehaviorOptions>(o => o.SuppressModelStateInvalidFilter = true); // let your ValidateModelFilter handle invalid ModelState
 [Route("api/[controller]")]
 public class MoviesController : ControllerBase
 {

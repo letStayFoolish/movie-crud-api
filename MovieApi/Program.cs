@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieApi.Enums;
 using MovieApi.Filters;
@@ -9,6 +9,7 @@ using MovieApi.Services.Notifications;
 using MovieApi.Utilities;
 using Scalar.AspNetCore;
 using Serilog;
+using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 //Source: https://codewithmukesh.com/blog/aspnet-core-webapi-crud-with-entity-framework-core-full-course/#crud-operations---movieservice-implementation
 try
