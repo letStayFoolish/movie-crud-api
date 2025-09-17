@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using MovieApi.DTOs.Movie;
 using MovieApi.Filters;
+using MovieApi.Models;
 using MovieApi.Services.Movies;
 
 namespace MovieApi.Controllers;
@@ -12,14 +14,16 @@ namespace MovieApi.Controllers;
 public class MoviesController : ControllerBase
 {
     private readonly IMovieService _service;
+    private readonly PaginationOptions _paginationOptions;
     // Sensible defaults for pagination
     private const int DefaultPageSize = 20;
     private const int MaxPageSize = 100;
 
 
-    public MoviesController(IMovieService service)
+    public MoviesController(IMovieService service, IOptions<PaginationOptions> paginationOptions)
     {
         _service = service;
+        _paginationOptions = paginationOptions.Value;
     }
 
     // POST
@@ -35,7 +39,7 @@ public class MoviesController : ControllerBase
     public async Task<IActionResult> GetAllMovies([FromQuery] int page, [FromQuery] int pageSize, CancellationToken cancellationToken)
     {
         page = Math.Max(0 , page);
-        pageSize = pageSize <= 0 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
+        pageSize = pageSize <= 0 ? _paginationOptions.PageSize : Math.Min(pageSize, _paginationOptions.MaxPageSize);
         var movies = await _service.GetAllMoviesAsync(page, pageSize, cancellationToken);
         return Ok(movies);
     }

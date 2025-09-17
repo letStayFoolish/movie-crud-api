@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MovieApi.Enums;
 using MovieApi.Filters;
 using MovieApi.Middlewares;
+using MovieApi.Models;
 using MovieApi.Persistence;
 using MovieApi.Services.Movies;
 using MovieApi.Services.Notifications;
@@ -31,6 +32,7 @@ try
     {
         options.Filters.Add<LoggingFilter>(); // resolve from DI per request (scoped)
     });
+    builder.Services.AddOptions<PaginationOptions>().BindConfiguration(nameof(PaginationOptions));
     builder.Services.AddOpenApi();
     builder.Services.AddHealthChecks();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

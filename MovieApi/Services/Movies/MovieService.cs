@@ -8,8 +8,6 @@ namespace MovieApi.Services.Movies;
 
 public sealed class MovieService : IMovieService
 {
-    private const int DefaultPageSize = 4;
-    private const int MaxPageSize = 100;
     private readonly MovieDbContext _context;
     private readonly ILogger<MovieService> _logger;
 
@@ -54,11 +52,11 @@ public sealed class MovieService : IMovieService
         int PageSize
     );
 
-    public async Task<PageResult<MovieDto>> GetAllMoviesAsync(int page = 1, int pageSize = DefaultPageSize,
+    public async Task<PageResult<MovieDto>> GetAllMoviesAsync(int page, int pageSize,
         CancellationToken cancellationToken = default)
     {
-        page = Math.Max(1, page);
-        pageSize = pageSize <= 0 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
+        // page = Math.Max(1, page);
+        // pageSize = pageSize <= 0 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
 
         var baseQuery = _context.Movies.AsNoTracking();
 
