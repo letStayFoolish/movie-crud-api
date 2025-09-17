@@ -12,6 +12,10 @@ namespace MovieApi.Controllers;
 public class MoviesController : ControllerBase
 {
     private readonly IMovieService _service;
+    // Sensible defaults for pagination
+    private const int DefaultPageSize = 20;
+    private const int MaxPageSize = 100;
+
 
     public MoviesController(IMovieService service)
     {
@@ -28,9 +32,11 @@ public class MoviesController : ControllerBase
 
     // GET
     [HttpGet]
-    public async Task<IActionResult> GetAllMovies([FromQuery] int take, [FromQuery] int skip, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllMovies([FromQuery] int page, [FromQuery] int pageSize, CancellationToken cancellationToken)
     {
-        var movies = await _service.GetAllMoviesAsync(take, skip, cancellationToken);
+        page = Math.Max(0 , page);
+        pageSize = pageSize <= 0 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
+        var movies = await _service.GetAllMoviesAsync(page, pageSize, cancellationToken);
         return Ok(movies);
     }
 

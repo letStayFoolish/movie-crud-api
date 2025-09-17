@@ -47,16 +47,28 @@ public sealed class MovieService : IMovieService
             movieFound.Rating);
     }
 
-    public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync(int take = DefaultPageSize, int skip = default, CancellationToken cancellationToken = default)
-    {
-        skip = Math.Max(0, skip);
-        take = take <= 0 ? DefaultPageSize : Math.Min(take, MaxPageSize);
+    public sealed record PageResult<T>(
+        IReadOnlyList<T> Items,
+        long TotalCount,
+        int Page,
+        int PageSize
+    );
 
-        // retrieves all movies from the database without tracking changes for better performance.
-        var query = await _context.Movies
-            .Skip(skip)
-            .Take(take)
-            .AsNoTracking()
+    public async Task<PageResult<MovieDto>> GetAllMoviesAsync(int page = 1, int pageSize = DefaultPageSize,
+        CancellationToken cancellationToken = default)
+    {
+        page = Math.Max(1, page);
+        pageSize = pageSize <= 0 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
+
+        var baseQuery = _context.Movies.AsNoTracking();
+
+        var totalCount = await baseQuery.LongCountAsync(cancellationToken);
+
+        var items = await baseQuery
+            .OrderBy(m => m.Title)
+            .ThenBy(m => m.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(m => new MovieDto(
                 m.Id,
                 m.Title,
@@ -65,7 +77,7 @@ public sealed class MovieService : IMovieService
                 m.Rating
             )).ToListAsync(cancellationToken);
 
-        return query;
+        return new PageResult<MovieDto>(items, totalCount, page, pageSize);
     }
 
     public async Task UpdateMovieAsync(Guid movieId, UpdateMovieDto movie,
