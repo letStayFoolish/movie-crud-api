@@ -32,8 +32,10 @@ public sealed class MovieService : IMovieService
 
     public async Task<MovieDto?> GetMovieByIdAsync(Guid movieId, CancellationToken cancellationToken = default)
     {
-        var movieFound = await _context.Movies.AsNoTracking()
+        var movieFound = await _context.Movies
+            .AsNoTracking()
             .FirstOrDefaultAsync(movie => movie.Id == movieId, cancellationToken);
+
         if (movieFound is null)
         {
             throw new MovieNotFoundException(movieId);
@@ -46,19 +48,23 @@ public sealed class MovieService : IMovieService
     public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync(CancellationToken cancellationToken = default)
     {
         // retrieves all movies from the database without tracking changes for better performance.
-        return await _context.Movies.AsNoTracking().Select(m => new MovieDto(
-            m.Id,
-            m.Title,
-            m.Genre,
-            m.ReleaseDate,
-            m.Rating
-        )).ToListAsync(cancellationToken);
+        return await _context.Movies
+            .AsNoTracking()
+            .Select(m => new MovieDto(
+                m.Id,
+                m.Title,
+                m.Genre,
+                m.ReleaseDate,
+                m.Rating
+            )).ToListAsync(cancellationToken);
     }
 
     public async Task UpdateMovieAsync(Guid movieId, UpdateMovieDto movie,
         CancellationToken cancellationToken = default)
     {
-        var movieToUpdate = await _context.Movies.FirstOrDefaultAsync(movie => movie.Id == movieId, cancellationToken);
+        var movieToUpdate = await _context.Movies
+            .FirstOrDefaultAsync(m => m.Id == movieId, cancellationToken);
+
         if (movieToUpdate is null)
         {
             // throw new ArgumentNullException($"Invalid movie id: {movieId}.");
@@ -71,15 +77,15 @@ public sealed class MovieService : IMovieService
 
     public async Task DeleteMovieAsync(Guid movieId, CancellationToken cancellationToken = default)
     {
-        var movieToDelete = await _context.Movies.FirstOrDefaultAsync(movie => movie.Id == movieId, cancellationToken);
-        if (movieToDelete is not null)
-        {
-            _context.Movies.Remove(movieToDelete);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-        else
+        var movieToDelete = await _context.Movies
+            .FirstOrDefaultAsync(movie => movie.Id == movieId, cancellationToken);
+
+        if (movieToDelete is null)
         {
             throw new MovieNotFoundException(movieId);
         }
+
+        _context.Movies.Remove(movieToDelete);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -62,6 +62,7 @@ try
 
         // Recommended Approach for Production
         // Use EF Core Migrations instead of EnsureCreatedAsync. Migrations provide a systematic way to evolve your database schema while preserving existing data.
+        // await dbContext.Database.MigrateAsync(cancellationToken: default);
     }
 
     if (app.Environment.IsDevelopment())

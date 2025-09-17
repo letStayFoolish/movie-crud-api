@@ -1,6 +1,6 @@
 namespace MovieApi.Models;
 
-public class Movie : EntityBase
+public sealed class Movie : EntityBase
 {
     // private setters to ensure that changes can only be made within the class, maintaining the integrity of the object.
     public string Title { get; private set; }
@@ -65,7 +65,7 @@ public class Movie : EntityBase
             throw new ArgumentException("Release date cannot be before 1900", nameof(releaseDate));
         }
 
-        if (rating < 0 || rating > 10)
+        if (rating is < 0 or > 10)
         {
             throw new ArgumentException("Rating must be between 0 and 10", nameof(rating));
         }

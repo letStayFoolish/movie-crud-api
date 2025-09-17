@@ -13,11 +13,11 @@ public class LoggingFilter : IActionFilter
 
     public void OnActionExecuting(ActionExecutingContext context)
     {
-        _logger.LogInformation($"Executing {context.ActionDescriptor.DisplayName}");
+        _logger.LogInformation("Executing {ActionDescriptorDisplayName}", context.ActionDescriptor.DisplayName);
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
     {
-        _logger.LogInformation($"Executed {context.ActionDescriptor.DisplayName}");
+        _logger.LogInformation("Executed {ActionDescriptorDisplayName}", context.ActionDescriptor.DisplayName);
     }
 }
