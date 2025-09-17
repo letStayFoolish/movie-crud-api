@@ -8,6 +8,8 @@ namespace MovieApi.Services.Movies;
 
 public sealed class MovieService : IMovieService
 {
+    private const int DefaultPageSize = 4;
+    private const int MaxPageSize = 100;
     private readonly MovieDbContext _context;
     private readonly ILogger<MovieService> _logger;
 
@@ -45,10 +47,15 @@ public sealed class MovieService : IMovieService
             movieFound.Rating);
     }
 
-    public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync(int take = DefaultPageSize, int skip = default, CancellationToken cancellationToken = default)
     {
+        skip = Math.Max(0, skip);
+        take = take <= 0 ? DefaultPageSize : Math.Min(take, MaxPageSize);
+
         // retrieves all movies from the database without tracking changes for better performance.
-        return await _context.Movies
+        var query = await _context.Movies
+            .Skip(skip)
+            .Take(take)
             .AsNoTracking()
             .Select(m => new MovieDto(
                 m.Id,
@@ -57,6 +64,8 @@ public sealed class MovieService : IMovieService
                 m.ReleaseDate,
                 m.Rating
             )).ToListAsync(cancellationToken);
+
+        return query;
     }
 
     public async Task UpdateMovieAsync(Guid movieId, UpdateMovieDto movie,

@@ -28,9 +28,9 @@ public class MoviesController : ControllerBase
 
     // GET
     [HttpGet]
-    public async Task<IActionResult> GetAllMovies(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllMovies([FromQuery] int take, [FromQuery] int skip, CancellationToken cancellationToken)
     {
-        var movies = await _service.GetAllMoviesAsync(cancellationToken);
+        var movies = await _service.GetAllMoviesAsync(take, skip, cancellationToken);
         return Ok(movies);
     }
 
