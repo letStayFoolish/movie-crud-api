@@ -6,8 +6,8 @@ namespace MovieApi.Models;
 
 public class PaginationOptions
 {
-    public int Page { get; set; } = default;
-    [Required, Range(1, 100)] public int PageSize { get; set; } = 10;
+    public int Page { get; set; }
+    [Required, Range(1, 100)] public int PageSize { get; set; }
     [Required, Range(1, 100)]
     public int MaxPageSize { get; set; }
 }
