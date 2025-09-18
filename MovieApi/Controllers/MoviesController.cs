@@ -36,11 +36,14 @@ public class MoviesController : ControllerBase
 
     // GET
     [HttpGet]
-    public async Task<IActionResult> GetAllMovies([FromQuery] int page, [FromQuery] int pageSize, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllMovies(CancellationToken cancellationToken, [FromQuery] int? currentPage, [FromQuery] int? pageSize)
     {
-        page = Math.Max(0 , page);
-        pageSize = pageSize <= 0 ? _paginationOptions.PageSize : Math.Min(pageSize, _paginationOptions.MaxPageSize);
-        var movies = await _service.GetAllMoviesAsync(page, pageSize, cancellationToken);
+        var effectivePageNumber = Math.Max(0, currentPage ?? _paginationOptions.Page);
+        var effectivePageSize = pageSize is >= 1
+            ? Math.Min(pageSize.Value, _paginationOptions.MaxPageSize)
+            : _paginationOptions.PageSize;
+
+        var movies = await _service.GetAllMoviesAsync(effectivePageNumber, effectivePageSize, cancellationToken);
         return Ok(movies);
     }
 

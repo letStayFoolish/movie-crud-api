@@ -32,7 +32,9 @@ try
     {
         options.Filters.Add<LoggingFilter>(); // resolve from DI per request (scoped)
     });
-    builder.Services.AddOptions<PaginationOptions>().BindConfiguration(nameof(PaginationOptions));
+    builder.Services.AddOptions<PaginationOptions>().BindConfiguration(nameof(PaginationOptions))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
     builder.Services.AddOpenApi();
     builder.Services.AddHealthChecks();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
