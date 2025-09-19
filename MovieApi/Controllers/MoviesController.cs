@@ -15,10 +15,6 @@ public class MoviesController : ControllerBase
 {
     private readonly IMovieService _service;
     private readonly PaginationOptions _paginationOptions;
-    // Sensible defaults for pagination
-    private const int DefaultPageSize = 20;
-    private const int MaxPageSize = 100;
-
 
     public MoviesController(IMovieService service, IOptions<PaginationOptions> paginationOptions)
     {
@@ -31,7 +27,7 @@ public class MoviesController : ControllerBase
     public async Task<IActionResult> CreateMovie([FromBody] CreateMovieDto command, CancellationToken cancellationToken)
     {
         var movie = await _service.CreateMovieAsync(command, cancellationToken);
-        return CreatedAtAction(nameof(GetMovieById), new { Id = movie.Id }, movie);
+        return CreatedAtAction(nameof(GetMovieById), new { movie.Id }, movie);
     }
 
     // GET

@@ -5,3 +5,5 @@
 [] Dockerize the Application: Dockerizing your application makes it more portable and scalable. It simplifies deployments across different environments. If you’re new to Docker, check out my Getting Started Guide for Docker to learn how to containerize your .NET applications.
 
 [] Deploy to the Cloud: Finally, take your application to the cloud! Whether it’s AWS, Azure, or Google Cloud, deploying your API to the cloud enhances scalability, security, and manageability. Each cloud provider has its own deployment strategies, but they all offer a variety of services to support your application.
+
+[] Authentication and Authorization using JWT tokens.
