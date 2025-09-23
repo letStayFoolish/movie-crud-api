@@ -8,10 +8,10 @@ namespace MovieApi.Services.Movies;
 
 public sealed class MovieService : IMovieService
 {
-    private readonly MovieDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly ILogger<MovieService> _logger;
 
-    public MovieService(MovieDbContext context, ILogger<MovieService> logger)
+    public MovieService(ApplicationDbContext context, ILogger<MovieService> logger)
     {
         _context = context;
         _logger = logger;

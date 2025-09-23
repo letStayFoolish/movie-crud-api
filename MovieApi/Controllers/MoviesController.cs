@@ -1,12 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MovieApi.DTOs.Movie;
-using MovieApi.Filters;
 using MovieApi.Models;
 using MovieApi.Services.Movies;
 
 namespace MovieApi.Controllers;
 
+[Authorize]
 [ApiController]
 // [TypeFilter(typeof(LoggingFilter))]
 // [TypeFilter(typeof(ValidateModelFilter))] // TODO: for this to be working we need to ad in Program.cs: builder.Services.Configure<ApiBehaviorOptions>(o => o.SuppressModelStateInvalidFilter = true); // let your ValidateModelFilter handle invalid ModelState
@@ -31,6 +32,7 @@ public class MoviesController : ControllerBase
     }
 
     // GET
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAllMovies(CancellationToken cancellationToken, [FromQuery] int? currentPage, [FromQuery] int? pageSize)
     {
@@ -44,8 +46,9 @@ public class MoviesController : ControllerBase
     }
 
     // GET
+    [AllowAnonymous]
     [HttpGet]
-    [Route("{id}")]
+    [Route("{id:guid}")]
     public async Task<IActionResult> GetMovieById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var movie = await _service.GetMovieByIdAsync(id, cancellationToken);
@@ -60,7 +63,7 @@ public class MoviesController : ControllerBase
 
     // PUT
     [HttpPut]
-    [Route("{id}")]
+    [Route("{id:guid}")]
     public async Task<IActionResult> UpdateMovie([FromRoute] Guid id, [FromBody] UpdateMovieDto command,
         CancellationToken cancellationToken)
     {
@@ -69,8 +72,9 @@ public class MoviesController : ControllerBase
     }
 
     // DELETE
+    [Authorize(Roles = "Administrator")]
     [HttpDelete]
-    [Route("{id}")]
+    [Route("{id:guid}")]
     public async Task<IActionResult> DeleteMovie([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         await _service.DeleteMovieAsync(id, cancellationToken);
