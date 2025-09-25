@@ -1,6 +1,4 @@
-﻿// This file is part of the project. Copyright (c) Company.
-
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using MovieApi.Constants;
 using MovieApi.Enums;
 using MovieApi.Models;
@@ -18,18 +16,20 @@ public class ApplicationDbContextSeed
         await roleManager.CreateAsync(new IdentityRole(Roles.User.ToString()));
 
         // Seed Default user
-        var email = Authorization.default_email;
-        var username = Authorization.default_username;
-        var password = Authorization.default_password;
-        var defaultRole = Authorization.default_role.ToString();
+        const string firstName = "Default";
+        const string lastName = "User";
+        const string email = Authorization.default_email;
+        const string username = Authorization.default_username;
+        const string password = Authorization.default_password;
+        string defaultRole = Authorization.default_role.ToString();
 
         var existing = await userManager.FindByEmailAsync(email);
         if (existing is null)
         {
             var defaultUser = new ApplicationUser
             {
-                FirstName = "Default",
-                LastName = "User",
+                FirstName = firstName,
+                LastName = lastName,
                 UserName = username,
                 Email = email,
                 EmailConfirmed = true,

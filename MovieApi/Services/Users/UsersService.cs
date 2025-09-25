@@ -1,6 +1,4 @@
-﻿// This file is part of the project. Copyright (c) Company.
-
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using MovieApi.Constants;
 using MovieApi.DTOs.Auth;
 using MovieApi.DTOs.Users;
+using MovieApi.Enums;
+using MovieApi.Exceptions;
 using MovieApi.Models;
 using MovieApi.Settings;
 
@@ -38,7 +38,7 @@ public class UsersService : IUsersService
             UserName = model.Username,
             Email = model.Email,
             FirstName = model.FirstName,
-            LastName = model.LastName
+            LastName = model.LastName,
         };
         var userWithSameEmail = await _userManager.FindByEmailAsync(model.Email);
         if (userWithSameEmail == null)
@@ -81,6 +81,19 @@ public class UsersService : IUsersService
             //     return authenticationModel;
             // }
 
+            if (String.IsNullOrWhiteSpace(user.Email))
+            {
+                authenticationModel.IsAuthenticated = false;
+                throw new UserDataException(user.Email);
+            }
+
+
+            if (String.IsNullOrWhiteSpace(user.UserName))
+            {
+                authenticationModel.IsAuthenticated = false;
+                throw new UserDataException(user.UserName);
+            }
+
             authenticationModel.Email = user.Email;
             authenticationModel.UserName = user.UserName;
             var roleList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
@@ -91,6 +104,28 @@ public class UsersService : IUsersService
         authenticationModel.IsAuthenticated = false;
         authenticationModel.Message = $"Incorrect Credentials for user {user.Email}.";
         return authenticationModel;
+    }
+
+    public async Task<string> AddRoleAsync(AddRoleModel model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null)
+        {
+            return $"No Accounts Registered with {model.Email}.";
+        }
+
+        if (await _userManager.CheckPasswordAsync(user, model.Password))
+        {
+            var roleExists = Enum.GetNames(typeof(Roles)).Any(x => x.ToLower() == model.Role.ToLower());
+            if (roleExists)
+            {
+                var validRole = Enum.GetValues(typeof(Roles)).Cast<Roles>().FirstOrDefault(x => string.Equals(x.ToString(), model.Role, StringComparison.CurrentCultureIgnoreCase));
+                await _userManager.AddToRoleAsync(user, validRole.ToString());
+                return $"Added {model.Role} to user {model.Email}.";
+            }
+            return $"Role {model.Role} not found.";
+        }
+        return $"Incorrect Credentials for user {user.Email}.";
     }
 
     private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user)

@@ -34,7 +34,8 @@ public class MoviesController : ControllerBase
     // GET
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetAllMovies(CancellationToken cancellationToken, [FromQuery] int? currentPage, [FromQuery] int? pageSize)
+    public async Task<IActionResult> GetAllMovies(CancellationToken cancellationToken, [FromQuery] int? currentPage,
+        [FromQuery] int? pageSize)
     {
         var effectivePageNumber = Math.Max(0, currentPage ?? _paginationOptions.Page);
         var effectivePageSize = pageSize is >= 1

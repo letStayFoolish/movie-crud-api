@@ -1,5 +1,6 @@
 ﻿using MovieApi.DTOs.Auth;
 using MovieApi.DTOs.Users;
+using MovieApi.Models;
 
 namespace MovieApi.Services.Users;
 
@@ -8,4 +9,5 @@ public interface IUsersService
 {
     public Task<string> RegisterAsync(RegisterModel model);
     public Task<AuthenticationModel> GetTokenAsync(TokenRequestModel model);
+    public Task<string> AddRoleAsync(AddRoleModel model);
 }

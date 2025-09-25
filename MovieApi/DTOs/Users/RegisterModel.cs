@@ -1,6 +1,5 @@
-﻿// This file is part of the project. Copyright (c) Company.
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using MovieApi.Enums;
 
 namespace MovieApi.DTOs.Users;
 
