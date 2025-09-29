@@ -92,6 +92,20 @@ try
         o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         o.SerializerOptions.WriteIndented = false;
     });
+
+    const string ScalarOnlyCors = "Scalar Open API";
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(name: ScalarOnlyCors, policyBuilder =>
+        {
+            policyBuilder
+                .WithOrigins("https://client.scalar.com")
+                .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .WithHeaders("Authorization", "Content-Type");
+        });
+    });
+
     var app = builder.Build();
 
     await using (var serviceScope = app.Services.CreateAsyncScope())
@@ -116,8 +130,11 @@ try
         app.MapScalarApiReference();
     }
 
+
     app.UseExceptionHandler();
     app.UseRouting();
+
+    app.UseCors(ScalarOnlyCors);
 
     app.UseHttpsRedirection();
 

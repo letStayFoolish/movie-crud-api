@@ -90,7 +90,12 @@ public sealed class MovieService : IMovieService
             throw new MovieNotFoundException(movieId);
         }
 
-        movieToUpdate.Update(movie.Title, movie.Genre, movie.ReleaseDate, movie.Rating);
+        var newTitle = movie.Title ?? movieToUpdate.Title;
+        var newGenre = movie.Genre ?? movieToUpdate.Genre;
+        var newReleaseDate = movie.ReleaseDate ?? movieToUpdate.ReleaseDate;
+        var newRating = movie.Rating ?? movieToUpdate.Rating;
+
+        movieToUpdate.Update(newTitle, newGenre, newReleaseDate, newRating);
         await _context.SaveChangesAsync(cancellationToken);
     }
 

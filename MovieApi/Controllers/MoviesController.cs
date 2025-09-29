@@ -25,6 +25,7 @@ public class MoviesController : ControllerBase
 
     // POST
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> CreateMovie([FromBody] CreateMovieDto command, CancellationToken cancellationToken)
     {
         var movie = await _service.CreateMovieAsync(command, cancellationToken);
