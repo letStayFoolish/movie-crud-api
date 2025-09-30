@@ -10,6 +10,7 @@ using MovieApi.DTOs.Users;
 using MovieApi.Enums;
 using MovieApi.Exceptions;
 using MovieApi.Models;
+using MovieApi.Services.RefreshToken;
 using MovieApi.Settings;
 
 namespace MovieApi.Services.Users;
@@ -17,18 +18,15 @@ namespace MovieApi.Services.Users;
 public class UsersService : IUsersService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly JWT _jwt;
-    private readonly ILogger<UsersService> _logger;
+    private readonly IRefreshTokenService _refreshTokenService;
 
-    public UsersService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager,
-        IOptions<JWT> jwt,
-        ILogger<UsersService> logger)
+    public UsersService(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt,
+        IRefreshTokenService refreshTokenService)
     {
         _userManager = userManager;
-        _roleManager = roleManager;
         _jwt = jwt.Value;
-        _logger = logger;
+        _refreshTokenService = refreshTokenService;
     }
 
     public async Task<string> RegisterAsync(RegisterModel model)
@@ -81,14 +79,14 @@ public class UsersService : IUsersService
             //     return authenticationModel;
             // }
 
-            if (String.IsNullOrWhiteSpace(user.Email))
+            if (string.IsNullOrWhiteSpace(user.Email))
             {
                 authenticationModel.IsAuthenticated = false;
                 throw new UserDataException(user.Email);
             }
 
 
-            if (String.IsNullOrWhiteSpace(user.UserName))
+            if (string.IsNullOrWhiteSpace(user.UserName))
             {
                 authenticationModel.IsAuthenticated = false;
                 throw new UserDataException(user.UserName);
@@ -98,6 +96,23 @@ public class UsersService : IUsersService
             authenticationModel.UserName = user.UserName;
             var roleList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
             authenticationModel.Roles = roleList.ToList();
+
+            if (user.RefreshTokens.Any(a => a.IsActive))
+            {
+                var activeRefreshToken = user.RefreshTokens.FirstOrDefault(t => t.IsActive);
+                authenticationModel.RefreshToken = activeRefreshToken.Token;
+                authenticationModel.RefreshTokenExpiration = activeRefreshToken.Expires;
+            }
+            else
+            {
+                var refreshToken = _refreshTokenService.CreateRefreshToken();
+
+                authenticationModel.RefreshToken = refreshToken.Token;
+                authenticationModel.RefreshTokenExpiration = refreshToken.Expires;
+                user.RefreshTokens.Add(refreshToken);
+                await _userManager.UpdateAsync(user);
+            }
+
             return authenticationModel;
         }
 
@@ -119,13 +134,76 @@ public class UsersService : IUsersService
             var roleExists = Enum.GetNames(typeof(Roles)).Any(x => x.ToLower() == model.Role.ToLower());
             if (roleExists)
             {
-                var validRole = Enum.GetValues(typeof(Roles)).Cast<Roles>().FirstOrDefault(x => string.Equals(x.ToString(), model.Role, StringComparison.CurrentCultureIgnoreCase));
+                var validRole = Enum.GetValues(typeof(Roles)).Cast<Roles>().FirstOrDefault(x =>
+                    string.Equals(x.ToString(), model.Role, StringComparison.CurrentCultureIgnoreCase));
                 await _userManager.AddToRoleAsync(user, validRole.ToString());
                 return $"Added {model.Role} to user {model.Email}.";
             }
+
             return $"Role {model.Role} not found.";
         }
+
         return $"Incorrect Credentials for user {user.Email}.";
+    }
+
+    public async Task<AuthenticationModel> RefreshTokenAsync(string token)
+    {
+        var authenticationModel = new AuthenticationModel();
+        var user = _userManager.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+        if (user == null)
+        {
+            authenticationModel.IsAuthenticated = false;
+            authenticationModel.Message = $"Token did not match any users.";
+            return authenticationModel;
+        }
+
+        var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
+        if (!refreshToken.IsActive)
+        {
+            authenticationModel.IsAuthenticated = false;
+            authenticationModel.Message = $"Token Not Active.";
+            return authenticationModel;
+        }
+
+        // Revoke Current Refresh Token
+        refreshToken.Revoked = DateTime.UtcNow; // This makes the refresh token inactive.
+
+        // Generate new Refresh Token and save to Database
+        var newRefreshToken = _refreshTokenService.CreateRefreshToken();
+        user.RefreshTokens.Add(newRefreshToken);
+        await _userManager.UpdateAsync(user);
+
+        //Generates new JWT
+        authenticationModel.IsAuthenticated = true;
+        JwtSecurityToken jwtSecurityToken = await CreateJwtTokenAsync(user);
+        authenticationModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+        authenticationModel.Email = user.Email;
+        authenticationModel.UserName = user.UserName;
+        var roleList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+        authenticationModel.Roles = roleList.ToList();
+        authenticationModel.RefreshToken = newRefreshToken.Token;
+        authenticationModel.RefreshTokenExpiration = newRefreshToken.Expires;
+        return authenticationModel;
+    }
+
+    public async Task<bool> RevokeTokenAsync(string token)
+    {
+        var user = _userManager.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+        if (user is null) return false;
+
+        var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
+        if(!refreshToken.IsActive) return false;
+
+        // revoke token and save
+        refreshToken.Revoked = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
+        return true;
+    }
+
+    public ApplicationUser? GetById(string id)
+    {
+        return _userManager.Users.SingleOrDefault(u => u.Id == id);
     }
 
     private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user)
@@ -141,7 +219,7 @@ public class UsersService : IUsersService
             for (int i = 0; i < roles.Count; i++)
             {
                 roleClaims.Add(new Claim("roles", roles[i]));
-            }
+            }2
          */
         var claims = new[]
             {

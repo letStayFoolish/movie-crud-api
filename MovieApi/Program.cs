@@ -9,8 +9,10 @@ using MovieApi.Middlewares;
 using MovieApi.Models;
 using MovieApi.Persistence;
 using MovieApi.Persistence.Configurations;
+using MovieApi.Services.AuthCookie;
 using MovieApi.Services.Movies;
 using MovieApi.Services.Notifications;
+using MovieApi.Services.RefreshToken;
 using MovieApi.Services.Users;
 using MovieApi.Settings;
 using MovieApi.Utilities;
@@ -80,11 +82,14 @@ try
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         options.UseNpgsql(connectionString);
     });
+    builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IMovieService, MovieService>();
     builder.Services.AddKeyedScoped<INotificationService, EmailNotificationService>(NotificationChannel.Email);
     builder.Services.AddKeyedScoped<INotificationService, SmsNotificationService>(NotificationChannel.Sms);
     builder.Services.AddScoped<NotificationHandler>();
     builder.Services.AddScoped<IUsersService, UsersService>();
+    builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+    builder.Services.AddScoped<IAuthCookieService, AuthCookieService>();
 
     builder.Services.Configure<RouteOptions>(o => o.LowercaseUrls = true);
     builder.Services.Configure<JsonOptions>(o =>
@@ -94,13 +99,15 @@ try
     });
 
     const string ScalarOnlyCors = "Scalar Open API";
+    const string PostmanOnlyCors = "Postman";
+    const string FrontendPolicy = "FrontendPolicy\n";
 
     builder.Services.AddCors(options =>
     {
-        options.AddPolicy(name: ScalarOnlyCors, policyBuilder =>
+        options.AddPolicy(name: FrontendPolicy, policyBuilder =>
         {
             policyBuilder
-                .WithOrigins("https://client.scalar.com")
+                .WithOrigins("http://localhost:3000", "https://your-frontend.example.com", "https://client.scalar.com")
                 .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .WithHeaders("Authorization", "Content-Type");
         });
@@ -134,7 +141,7 @@ try
     app.UseExceptionHandler();
     app.UseRouting();
 
-    app.UseCors(ScalarOnlyCors);
+    app.UseCors(FrontendPolicy);
 
     app.UseHttpsRedirection();
 

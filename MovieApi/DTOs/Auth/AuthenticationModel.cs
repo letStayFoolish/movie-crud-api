@@ -1,4 +1,6 @@
-﻿namespace MovieApi.DTOs.Auth;
+﻿using System.Text.Json.Serialization;
+
+namespace MovieApi.DTOs.Auth;
 
 public class AuthenticationModel
 {
@@ -8,4 +10,7 @@ public class AuthenticationModel
     public string Email { get; set; }
     public List<string> Roles { get; set; }
     public string Token { get; set; }
+
+    [JsonIgnore] public string RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiration { get; set; }
 }

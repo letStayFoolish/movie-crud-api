@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MovieApi.DTOs.Auth;
 using MovieApi.DTOs.Users;
 using MovieApi.Models;
 using MovieApi.Services.Users;
@@ -24,12 +23,6 @@ public class UsersController : ControllerBase
         return Created();
     }
 
-    [HttpPost("token")]
-    public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequestModel model)
-    {
-        var result = await _service.GetTokenAsync(model);
-        return Ok(result);
-    }
 
     [HttpPost("addrole")]
     public async Task<IActionResult> AddRoleAsync([FromBody] AddRoleModel model)
