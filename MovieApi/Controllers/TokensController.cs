@@ -2,10 +2,12 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using MovieApi.DTOs.Auth;
 using MovieApi.Models;
 using MovieApi.Services.AuthCookie;
 using MovieApi.Services.Users;
+using MovieApi.Settings;
 
 namespace MovieApi.Controllers;
 
@@ -13,20 +15,22 @@ namespace MovieApi.Controllers;
 [Route("api/[controller]")]
 public class TokensController : ControllerBase
 {
-    private readonly IUsersService _service;
+    private readonly IUsersService _usersService;
     private readonly IAuthCookieService _authCookieService;
+    private readonly JWT _jwt;
 
-    public TokensController(IUsersService service, IAuthCookieService authCookieService)
+    public TokensController(IUsersService usersService, IAuthCookieService authCookieService, IOptions<JWT> jwt)
     {
-        _service = service;
+        _usersService = usersService;
         _authCookieService = authCookieService;
+        _jwt = jwt.Value;
     }
 
     [HttpPost]
     public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequestModel model)
     {
-        var result = await _service.GetTokenAsync(model);
-        _authCookieService.SetRefreshTokenInCookie(result.RefreshToken, 10);
+        var result = await _usersService.GetTokenAsync(model);
+        _authCookieService.SetRefreshTokenInCookie(result.RefreshToken, _jwt.DurationInDays);
         return Ok(result);
     }
 
@@ -34,13 +38,13 @@ public class TokensController : ControllerBase
     public async Task<IActionResult> RefreshTokenAsync()
     {
         var refreshToken = Request.Cookies["refreshToken"];
-        var response = await _service.RefreshTokenAsync(refreshToken);
+        var response = await _usersService.RefreshTokenAsync(refreshToken);
         if (!string.IsNullOrEmpty(response.RefreshToken))
         {
-            _authCookieService.SetRefreshTokenInCookie(response.RefreshToken, 10);
+            _authCookieService.SetRefreshTokenInCookie(response.RefreshToken, _jwt.DurationInDays);
+            return Ok(response);
         }
-
-        return Ok(response);
+        return BadRequest();
     }
 
     [Authorize]
@@ -48,7 +52,7 @@ public class TokensController : ControllerBase
     [Route("{id}")]
     public IActionResult GetRefreshTokens(string id)
     {
-        var user = _service.GetById(id);
+        var user = _usersService.GetById(id);
         if (user is null)
         {
             return NotFound($"User with id {id} not found.");
@@ -68,7 +72,7 @@ public class TokensController : ControllerBase
             return BadRequest(new { message = "Token is required." });
         }
 
-        var response = await _service.RevokeTokenAsync(token);
+        var response = await _usersService.RevokeTokenAsync(token);
 
         if (!response)
         {

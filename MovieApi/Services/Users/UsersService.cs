@@ -238,7 +238,7 @@ public class UsersService : IUsersService
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(_jwt.DurationInMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
             signingCredentials: signingCredentials);
 
         return jwtSecurityToken;

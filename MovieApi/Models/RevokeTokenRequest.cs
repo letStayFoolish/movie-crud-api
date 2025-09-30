@@ -1,6 +1,4 @@
-﻿// This file is part of the project. Copyright (c) Company.
-
-namespace MovieApi.Models;
+﻿namespace MovieApi.Models;
 
 public class RevokeTokenRequest
 {
