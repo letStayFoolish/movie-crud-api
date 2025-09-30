@@ -1,6 +1,4 @@
-﻿// This file is part of the project. Copyright (c) Company.
-
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MovieApi.DTOs.Auth;
@@ -8,7 +6,8 @@ using MovieApi.Models;
 using MovieApi.Services.AuthCookie;
 using MovieApi.Services.Users;
 using MovieApi.Settings;
-
+// source: https://codewithmukesh.com/blog/aspnet-core-api-with-jwt-authentication/
+// source: https://codewithmukesh.com/blog/refresh-tokens-in-aspnet-core/
 namespace MovieApi.Controllers;
 
 [ApiController]
@@ -52,7 +51,7 @@ public class TokensController : ControllerBase
     [Route("{id}")]
     public IActionResult GetRefreshTokens(string id)
     {
-        var user = _usersService.GetById(id);
+        var user = _usersService.GetUserById(id);
         if (user is null)
         {
             return NotFound($"User with id {id} not found.");

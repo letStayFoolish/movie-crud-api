@@ -19,7 +19,7 @@ public class UsersController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
-        await _service.RegisterAsync(model);
+        await _service.RegisterUserAsync(model);
         return Created();
     }
 
@@ -27,7 +27,7 @@ public class UsersController : ControllerBase
     [HttpPost("addrole")]
     public async Task<IActionResult> AddRoleAsync([FromBody] AddRoleModel model)
     {
-        var result = await _service.AddRoleAsync(model);
+        var result = await _service.AddRoleToUserAsync(model);
         return Ok(result);
     }
 }

@@ -1,6 +1,4 @@
-﻿// This file is part of the project. Copyright (c) Company.
-
-namespace MovieApi.Services.AuthCookie;
+﻿namespace MovieApi.Services.AuthCookie;
 
 public class AuthCookieService : IAuthCookieService
 {

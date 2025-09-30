@@ -29,7 +29,7 @@ public class UsersService : IUsersService
         _refreshTokenService = refreshTokenService;
     }
 
-    public async Task<string> RegisterAsync(RegisterModel model)
+    public async Task<string> RegisterUserAsync(RegisterModel model)
     {
         var user = new ApplicationUser
         {
@@ -53,6 +53,36 @@ public class UsersService : IUsersService
         {
             return $"Email {user.Email} already exists";
         }
+    }
+
+    public ApplicationUser? GetUserById(string id)
+    {
+        return _userManager.Users.SingleOrDefault(u => u.Id == id);
+    }
+
+    public async Task<string> AddRoleToUserAsync(AddRoleModel model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null)
+        {
+            return $"No Accounts Registered with {model.Email}.";
+        }
+
+        if (await _userManager.CheckPasswordAsync(user, model.Password))
+        {
+            var roleExists = Enum.GetNames(typeof(Roles)).Any(x => x.ToLower() == model.Role.ToLower());
+            if (roleExists)
+            {
+                var validRole = Enum.GetValues(typeof(Roles)).Cast<Roles>().FirstOrDefault(x =>
+                    string.Equals(x.ToString(), model.Role, StringComparison.CurrentCultureIgnoreCase));
+                await _userManager.AddToRoleAsync(user, validRole.ToString());
+                return $"Added {model.Role} to user {model.Email}.";
+            }
+
+            return $"Role {model.Role} not found.";
+        }
+
+        return $"Incorrect Credentials for user {user.Email}.";
     }
 
     public async Task<AuthenticationModel> GetTokenAsync(TokenRequestModel model)
@@ -121,31 +151,6 @@ public class UsersService : IUsersService
         return authenticationModel;
     }
 
-    public async Task<string> AddRoleAsync(AddRoleModel model)
-    {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user is null)
-        {
-            return $"No Accounts Registered with {model.Email}.";
-        }
-
-        if (await _userManager.CheckPasswordAsync(user, model.Password))
-        {
-            var roleExists = Enum.GetNames(typeof(Roles)).Any(x => x.ToLower() == model.Role.ToLower());
-            if (roleExists)
-            {
-                var validRole = Enum.GetValues(typeof(Roles)).Cast<Roles>().FirstOrDefault(x =>
-                    string.Equals(x.ToString(), model.Role, StringComparison.CurrentCultureIgnoreCase));
-                await _userManager.AddToRoleAsync(user, validRole.ToString());
-                return $"Added {model.Role} to user {model.Email}.";
-            }
-
-            return $"Role {model.Role} not found.";
-        }
-
-        return $"Incorrect Credentials for user {user.Email}.";
-    }
-
     public async Task<AuthenticationModel> RefreshTokenAsync(string token)
     {
         var authenticationModel = new AuthenticationModel();
@@ -199,11 +204,6 @@ public class UsersService : IUsersService
         await _userManager.UpdateAsync(user);
 
         return true;
-    }
-
-    public ApplicationUser? GetById(string id)
-    {
-        return _userManager.Users.SingleOrDefault(u => u.Id == id);
     }
 
     private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user)
