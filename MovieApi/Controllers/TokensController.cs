@@ -6,6 +6,7 @@ using MovieApi.Models;
 using MovieApi.Services.AuthCookie;
 using MovieApi.Services.Users;
 using MovieApi.Settings;
+
 // source: https://codewithmukesh.com/blog/aspnet-core-api-with-jwt-authentication/
 // source: https://codewithmukesh.com/blog/refresh-tokens-in-aspnet-core/
 namespace MovieApi.Controllers;
@@ -36,14 +37,13 @@ public class TokensController : ControllerBase
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshTokenAsync()
     {
+        // var refreshToken = "eUVSHfZrQF6U0RwlOrkXAYq8i/l5NWdjUIEq6uMOxz8=";
         var refreshToken = Request.Cookies["refreshToken"];
+        if (refreshToken is null || string.IsNullOrEmpty(refreshToken)) return BadRequest();
         var response = await _usersService.RefreshTokenAsync(refreshToken);
-        if (!string.IsNullOrEmpty(response.RefreshToken))
-        {
-            _authCookieService.SetRefreshTokenInCookie(response.RefreshToken, _jwt.DurationInDays);
-            return Ok(response);
-        }
-        return BadRequest();
+        if (string.IsNullOrEmpty(response.RefreshToken)) return BadRequest();
+        _authCookieService.SetRefreshTokenInCookie(response.RefreshToken, _jwt.DurationInDays);
+        return Ok(response);
     }
 
     [Authorize]
