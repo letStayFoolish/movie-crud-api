@@ -139,7 +139,8 @@ try
 
 
     app.UseExceptionHandler();
-    app.UseRouting();
+    app.UseStaticFiles();
+    app.UseRouting(); // Since .NET 6 this is no longer required, but it's still good practice to add it.'
 
     app.UseCors(FrontendPolicy);
 
