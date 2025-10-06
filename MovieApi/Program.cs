@@ -38,7 +38,11 @@ try
 
     // Authentication/Authorization
     // Configuration from AppSettings
-    builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+    // builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+    builder.Services.AddOptions<JWT>()
+        .BindConfiguration("JWT")
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
     // User Manager Service
     builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
     builder.Services
@@ -72,7 +76,7 @@ try
     });
     builder.Services.AddOptions<PaginationOptions>().BindConfiguration(nameof(PaginationOptions))
         .ValidateDataAnnotations()
-        .ValidateOnStart();
+        .ValidateOnStart(); // Startup Validation - you don’t want your application to even boot up if there are validation issues with the configurations.
     builder.Services.AddOpenApi();
     builder.Services.AddHealthChecks();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

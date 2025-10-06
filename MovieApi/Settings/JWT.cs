@@ -1,4 +1,6 @@
-﻿namespace MovieApi.Settings;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MovieApi.Settings;
 
 // will be used to read data from our previously created JWT Section of appsettings.json using the IOptions feature of ASP.NET Core.
 public class JWT
@@ -6,6 +8,8 @@ public class JWT
     public string Key { get; init; }
     public string Issuer { get; init; }
     public string Audience { get; init; }
+    [Range(1, 240)]
     public double DurationInMinutes { get; init; }
+    [Range(1, 30)]
     public int  DurationInDays { get; set; }
 }
