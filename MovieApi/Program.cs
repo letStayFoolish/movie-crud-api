@@ -70,6 +70,8 @@ try
         });
     builder.Services.AddAuthorization(); // add policies here if needed
 
+    builder.Services.AddMemoryCache();
+
     builder.Services.AddControllers(options =>
     {
         options.Filters.Add<LoggingFilter>(); // resolve from DI per request (scoped)
