@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MovieApi.DTOs.Movie;
 using MovieApi.Exceptions;
 using MovieApi.Models;
@@ -9,12 +10,16 @@ namespace MovieApi.Services.Movies;
 public sealed class MovieService : IMovieService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IMemoryCache _cache;
     private readonly ILogger<MovieService> _logger;
 
-    public MovieService(ApplicationDbContext context, ILogger<MovieService> logger)
+    private const string MoviesCacheKey = "movies";
+
+    public MovieService(ApplicationDbContext context, IMemoryCache cache, ILogger<MovieService> logger)
     {
         _context = context;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<MovieDto> CreateMovieAsync(CreateMovieDto movieDto, CancellationToken cancellationToken = default)
@@ -25,6 +30,9 @@ public sealed class MovieService : IMovieService
         }
 
         var newMovie = Movie.Create(movieDto.Title, movieDto.Genre, movieDto.ReleaseDate, movieDto.Rating);
+        var cacheKey = MoviesCacheKey;
+        _logger.LogInformation("invalidating cache for key: {CacheKey} from cache.", cacheKey);
+        _cache.Remove(cacheKey);
         await _context.Movies.AddAsync(newMovie, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return new MovieDto(newMovie.Id, newMovie.Title, newMovie.Genre, newMovie.ReleaseDate, newMovie.Rating);
@@ -32,6 +40,21 @@ public sealed class MovieService : IMovieService
 
     public async Task<MovieDto?> GetMovieByIdAsync(Guid movieId, CancellationToken cancellationToken = default)
     {
+        var cacheKey = $"movie:{movieId}";
+        _logger.LogInformation("fetching data for key: {CacheKey} from cache.", cacheKey);
+        if (!_cache.TryGetValue(cacheKey, out MovieDto? movieDto))
+        {
+            _logger.LogInformation("cache miss. fetching data for key: {CacheKey} from database.", cacheKey);
+
+
+            _logger.LogInformation("setting data for key: {CacheKey} to cache.", cacheKey);
+            var cacheSettings = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromSeconds(30))
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(300))
+                .SetPriority(CacheItemPriority.Normal);
+            _cache.Set(cacheKey, movieDto, cacheSettings);;
+        }
+
         var movieFound = await _context.Movies
             .AsNoTracking()
             .FirstOrDefaultAsync(movie => movie.Id == movieId, cancellationToken);
@@ -57,25 +80,44 @@ public sealed class MovieService : IMovieService
     {
         // page = Math.Max(1, page);
         // pageSize = pageSize <= 0 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
+        var cacheKey = MoviesCacheKey;
+        // var cacheKey = $"{MoviesCacheKey}:{page}:{pageSize}";
+        _logger.LogInformation("fetching data for key: {CacheKey} from cache.", cacheKey);
 
-        var baseQuery = _context.Movies.AsNoTracking();
+        if (!_cache.TryGetValue(cacheKey, out PageResult<MovieDto>? pageResult))
+        {
+            _logger.LogInformation("cache miss. fetching data for key: {CacheKey} from database.", cacheKey);
 
-        var totalCount = await baseQuery.LongCountAsync(cancellationToken);
+            var baseQuery = _context.Movies.AsNoTracking();
 
-        var items = await baseQuery
-            .OrderBy(m => m.Title)
-            .ThenBy(m => m.Id)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(m => new MovieDto(
-                m.Id,
-                m.Title,
-                m.Genre,
-                m.ReleaseDate,
-                m.Rating
-            )).ToListAsync(cancellationToken);
+            var totalCount = await baseQuery.LongCountAsync(cancellationToken);
 
-        return new PageResult<MovieDto>(items, totalCount, page, pageSize);
+            var items = await baseQuery
+                .OrderBy(m => m.Title)
+                .ThenBy(m => m.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(m => new MovieDto(
+                    m.Id,
+                    m.Title,
+                    m.Genre,
+                    m.ReleaseDate,
+                    m.Rating
+                )).ToListAsync(cancellationToken);
+
+            pageResult = new PageResult<MovieDto>(items, totalCount, page, pageSize);
+
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromSeconds(30))
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(300))
+                .SetPriority(CacheItemPriority.NeverRemove)
+                .SetSize(2048);
+            _logger.LogInformation("setting data for key: {CacheKey} to cache.", cacheKey);
+            _cache.Set(cacheKey, pageResult, cacheOptions);
+        }
+
+
+        return pageResult;
     }
 
     public async Task UpdateMovieAsync(Guid movieId, UpdateMovieDto movie,
@@ -95,6 +137,8 @@ public sealed class MovieService : IMovieService
         var newReleaseDate = movie.ReleaseDate ?? movieToUpdate.ReleaseDate;
         var newRating = movie.Rating ?? movieToUpdate.Rating;
 
+        var cacheKey = MoviesCacheKey;
+        _cache.Remove(cacheKey);
         movieToUpdate.Update(newTitle, newGenre, newReleaseDate, newRating);
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -109,6 +153,8 @@ public sealed class MovieService : IMovieService
             throw new MovieNotFoundException(movieId);
         }
 
+        var cacheKey = MoviesCacheKey;
+        _cache.Remove(cacheKey);
         _context.Movies.Remove(movieToDelete);
         await _context.SaveChangesAsync(cancellationToken);
     }
