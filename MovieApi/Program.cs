@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MovieApi.Enums;
@@ -73,6 +74,7 @@ try
     builder.Services.AddControllers(options =>
     {
         options.Filters.Add<LoggingFilter>(); // resolve from DI per request (scoped)
+        options.Filters.Add<ValidateModelFilter>(); // apply custom model validation globally
     });
     builder.Services.AddOptions<PaginationOptions>().BindConfiguration(nameof(PaginationOptions))
         .ValidateDataAnnotations()
@@ -95,7 +97,12 @@ try
     builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
     builder.Services.AddScoped<IAuthCookieService, AuthCookieService>();
 
-    builder.Services.Configure<RouteOptions>(o => o.LowercaseUrls = true);
+    builder.Services.Configure<ApiBehaviorOptions>(o =>
+            o.SuppressModelStateInvalidFilter = true // let ValidateModelFilter handle invalid ModelState
+    );
+    builder.Services.Configure<RouteOptions>(o =>
+        o.LowercaseUrls = true
+    );
     builder.Services.Configure<JsonOptions>(o =>
     {
         o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
