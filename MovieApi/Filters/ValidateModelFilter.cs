@@ -13,13 +13,22 @@ public class ValidateModelFilter : IActionFilter
     {
         _logger = logger;
     }
+
     public void OnActionExecuting(ActionExecutingContext context)
     {
         if (context.ModelState.IsValid) return;
-        _logger.LogWarning("Model is not valid: {modelState}", context.ModelState);
+        var firstError = context.ModelState
+            .Where((kvp) => kvp.Value?.Errors?.Count > 0)
+            .Select(kvp => kvp.Value!.Errors.FirstOrDefault()?.ErrorMessage)
+            .FirstOrDefault();
+
+
+        _logger.LogWarning("Model is not valid: {modelState}", firstError);
         // var model = new ArgumentException(context.ModelState.ToString());
         context.Result = new BadRequestObjectResult(context.ModelState);
     }
 
-    public void OnActionExecuted(ActionExecutedContext context) { }
+    public void OnActionExecuted(ActionExecutedContext context)
+    {
+    }
 }
