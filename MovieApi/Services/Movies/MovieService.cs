@@ -72,7 +72,9 @@ public sealed class MovieService : IMovieService
         IReadOnlyList<T> Items,
         long TotalCount,
         int Page,
-        int PageSize
+        int PageSize,
+        int TotalPages
+
     );
 
     public async Task<PageResult<MovieDto>> GetAllMoviesAsync(int page, int pageSize,
@@ -105,7 +107,9 @@ public sealed class MovieService : IMovieService
                     m.Rating
                 )).ToListAsync(cancellationToken);
 
-            pageResult = new PageResult<MovieDto>(items, totalCount, page, pageSize);
+            int totalPages = (int)Math.Ceiling(totalCount / (double) pageSize);
+
+            pageResult = new PageResult<MovieDto>(items, totalCount, page, pageSize, totalPages);
 
             var cacheOptions = new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromSeconds(30))
@@ -115,7 +119,6 @@ public sealed class MovieService : IMovieService
             _logger.LogInformation("setting data for key: {CacheKey} to cache.", cacheKey);
             _cache.Set(cacheKey, pageResult, cacheOptions);
         }
-
 
         return pageResult;
     }

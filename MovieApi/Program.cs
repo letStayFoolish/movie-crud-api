@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MovieApi.Enums;
+using MovieApi.Extensions;
 using MovieApi.Filters;
 using MovieApi.Middlewares;
 using MovieApi.Models;
@@ -72,6 +73,9 @@ try
     builder.Services.AddAuthorization(); // add policies here if needed
 
     builder.Services.AddMemoryCache();
+    builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddResponseCompression();
+    builder.Services.AddSession();
 
     builder.Services.AddControllers(options =>
     {
@@ -113,7 +117,7 @@ try
 
     const string ScalarOnlyCors = "Scalar Open API";
     const string PostmanOnlyCors = "Postman";
-    const string FrontendPolicy = "FrontendPolicy\n";
+    const string FrontendPolicy = "FrontendPolicy";
 
     builder.Services.AddCors(options =>
     {
@@ -150,17 +154,22 @@ try
         app.MapScalarApiReference();
     }
 
-
-    app.UseExceptionHandler();
-    app.UseStaticFiles();
-    app.UseRouting(); // Since .NET 6 this is no longer required, but it's still good practice to add it.'
-
+    app.UseExceptionHandler(); //Ensures all unhandled exceptions are caught before reaching the client.
+    app.UseHttpsRedirection(); //Redirects HTTP to HTTPS as soon as possible.
+    app.UseRouting(); // Ensures requests are mapped before authentication checks. Since .NET 6 this is no longer required, but it's still good practice to add it.'
     app.UseCors(FrontendPolicy);
-
-    app.UseHttpsRedirection();
 
     app.UseAuthentication(); // Make sure that app.UseAuthentication(); always comes before app.UseAuthorization();, since you technically need to Authenticate the user first, and then Authorize.
     app.UseAuthorization();
+
+    app.UseStaticFiles();
+
+    app.UseResponseCompression();
+
+    app.UseSession();
+
+    // app.UseMiddleware<HttpRequestLogger>(); // Custom Middleware
+    app.UseCustomMiddleware(); //Logging, rate-limiting, or request modification should happen before hitting controllers.
 
     // Endpoints
     app.MapControllers();
