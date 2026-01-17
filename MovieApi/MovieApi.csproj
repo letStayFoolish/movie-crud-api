@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+      <UserSecretsId>fa71ec9d-d7bb-4484-b955-17533dcddffd</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
@@ -16,12 +17,12 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.8.5" />
-        <PackageReference Include="Serilog" Version="4.3.0"/>
-        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
-        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
-        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
+        <PackageReference Include="Serilog" Version="4.3.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     </ItemGroup>
 
