@@ -1,14 +1,14 @@
 services:
   postgres:
     image: postgres
-    container_name: postgres
+    container_name: postgres-dotnetHero
     restart: always
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secret
+      POSTGRES_PASSWORD: ${DB__PASSWORD}
       POSTGRES_DB: dotnetHero
     ports:
-      - "15432:5432"
+      - "${PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
