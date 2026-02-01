@@ -3,6 +3,7 @@ namespace MovieApi.Models;
 // Making the class abstract ensures that it cannot be instantiated on its own, as it is meant to provide shared functionality rather than represent a standalone concept.
 public abstract class EntityBase
 {
+    // The base class EntityBase allows us to centralize common properties and behaviors that all domain entities will share.
     // private setters to ensure that changes can only be made within the class, maintaining the integrity of the object.
     public Guid Id { get; private init; } = Guid.NewGuid();
     public DateTimeOffset Created { get; private set; } = DateTimeOffset.UtcNow;

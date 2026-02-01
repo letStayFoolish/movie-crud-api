@@ -11,6 +11,7 @@ public sealed class Movie : EntityBase
     // private constructor for ORM frameworks
     private Movie()
     {
+        //The private constructor supports ORM frameworks that require parameter-less constructors to instantiate objects during database operations.
         this.Title = string.Empty;
         this.Genre = string.Empty;
     }

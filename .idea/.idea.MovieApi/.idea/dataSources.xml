@@ -4,6 +4,7 @@
     <data-source source="LOCAL" name="dotnetHero@localhost" uuid="6eb682f3-9039-497c-941e-817ba308455c">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
+      <remarks>dotnetHero</remarks>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/dotnetHero</jdbc-url>
       <jdbc-additional-properties>

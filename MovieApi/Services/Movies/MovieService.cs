@@ -22,6 +22,12 @@ public sealed class MovieService : IMovieService
         _cache = cache;
     }
 
+    /// <summary>
+    /// Asynchronously creates a new movie and saves it to the database.
+    /// </summary>
+    /// <param name="movieDto">The data transfer object containing information about the movie to be created.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the newly created movie as a data transfer object.</returns>
     public async Task<MovieDto> CreateMovieAsync(CreateMovieDto movieDto, CancellationToken cancellationToken = default)
     {
         if (_logger.IsEnabled(LogLevel.Debug))
@@ -38,6 +44,12 @@ public sealed class MovieService : IMovieService
         return new MovieDto(newMovie.Id, newMovie.Title, newMovie.Genre, newMovie.ReleaseDate, newMovie.Rating);
     }
 
+    /// <summary>
+    /// Asynchronously retrieves a movie by its unique identifier.
+    /// </summary>
+    /// <param name="movieId">The unique identifier of the movie to retrieve.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the movie data transfer object if found; otherwise, null.</returns>
     public async Task<MovieDto?> GetMovieByIdAsync(Guid movieId, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"movie:{movieId}";
@@ -74,9 +86,15 @@ public sealed class MovieService : IMovieService
         int Page,
         int PageSize,
         int TotalPages
-
     );
 
+    /// <summary>
+    /// Asynchronously retrieves a paginated list of movies from the database or cache.
+    /// </summary>
+    /// <param name="page">The page number to retrieve. Must be greater than or equal to 1.</param>
+    /// <param name="pageSize">The number of items per page. Must be greater than 0.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a paginated result of movies, including the total count and metadata for pagination.</returns>
     public async Task<PageResult<MovieDto>> GetAllMoviesAsync(int page, int pageSize,
         CancellationToken cancellationToken = default)
     {
@@ -123,6 +141,13 @@ public sealed class MovieService : IMovieService
         return pageResult;
     }
 
+    /// <summary>
+    /// Asynchronously updates the details of an existing movie in the database.
+    /// </summary>
+    /// <param name="movieId">The unique identifier of the movie to be updated.</param>
+    /// <param name="movie">The data transfer object containing the updated details of the movie.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateMovieAsync(Guid movieId, UpdateMovieDto movie,
         CancellationToken cancellationToken = default)
     {
@@ -146,6 +171,12 @@ public sealed class MovieService : IMovieService
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Asynchronously deletes a movie from the database if it exists.
+    /// </summary>
+    /// <param name="movieId">The unique identifier of the movie to be deleted.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task DeleteMovieAsync(Guid movieId, CancellationToken cancellationToken = default)
     {
         var movieToDelete = await _context.Movies

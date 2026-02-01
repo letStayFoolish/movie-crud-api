@@ -43,5 +43,24 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         // Optional: add index for better query performance
         // creates a database index on the Title column. This can significantly improve query performance when searching or filtering by Title
         builder.HasIndex(m => m.Title);
+
+        //EF Core 10: Named query filter for soft delete
+        // builder.HasQueryFilter("SoftDelete", m => !m.IsDeleted);
+
+        //EF Core 10: Named query for active records only
+        // builder.HasQueryFilter("ActiveOnly", m => m.IsActive);
     }
 }
+
+/*
+ * Then in queries, we can selectively ignore specific filters:
+ *
+ * Gets only active, non-deleted movies (entities) (both filter applied)
+ * var activeMovies = await _dbContext.Movies.ToListAsync();
+ *
+ * Gets all movies including deleted ones (ignores SoftDelete filter)
+ * var allMovies = await _dbContext.Movies.IgnoreQueryFilter("softDelete").ToListAsync();
+ *
+ * Gets all movies including inactive ones (ignoring ActiveOnly filter)
+ * var allActiveMovies = await _dbContext.Movies.IgnoreQueryFilter("ActiveOnly").ToListAsync();
+ */

@@ -71,6 +71,7 @@ public static class DIExtensions
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
+        //Scoped lifetime for DbContext (default when using AddDbContext)
         services.AddDbContext<ApplicationDbContext>(options =>
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
