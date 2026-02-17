@@ -56,7 +56,7 @@ Here’s what the fluent chain does:
 
 **PRO TIP: Always be explicit about delete behavior! The _default_ `Cascade` for required relationships can accidently wipe out important data. Use `Restrict` for business entities and handle delete logic in the application.**
 
-## Querying One-to-Many
+## Querying One-to-One
 
 In a one-to-one relationship, each entity on both sides is associated with at most one entity on the other side. Think: a customer has exactly one profile, or an order has exactly one shipping address record.
 
