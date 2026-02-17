@@ -1,5 +1,3 @@
-// This file is part of the project. Copyright (c) Company.
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MovieApi.Models;

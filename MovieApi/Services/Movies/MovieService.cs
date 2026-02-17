@@ -168,6 +168,8 @@ public sealed class MovieService : IMovieService
         var cacheKey = MoviesCacheKey;
         _cache.Remove(cacheKey);
         movieToUpdate.Update(newTitle, newGenre, newReleaseDate, newRating);
+        _context.ChangeTracker.DetectChanges();
+        _logger.LogDebug(_context.ChangeTracker.DebugView.LongView);
         await _context.SaveChangesAsync(cancellationToken);
     }
 

@@ -14,5 +14,4 @@ public class Customer
     //Navigation Properties:
     public ICollection<Order> Orders { get; set; } = []; // 1:N new List<Order>(); == []
     public CustomerProfile? CustomerProfile { get; set; } // 1:1
-
 }

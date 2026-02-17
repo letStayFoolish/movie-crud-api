@@ -244,5 +244,10 @@ CREATE INDEX "IX_product_tags_TagsId" ON app.product_tags ("TagsId");
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20260216140637_AddEntitites_Order_Product_Customer_Tag_OrderItems', '9.0.9');
 
+CREATE UNIQUE INDEX "IX_Customer_Name" ON app."Customer" ("Name");
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260217101626_UpdateColumnCustomerNameIsUnique', '9.0.9');
+
 COMMIT;
 
